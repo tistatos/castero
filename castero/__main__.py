@@ -18,6 +18,7 @@ from castero.database import Database
 from castero.display import Display
 from castero.feed import Feed
 from castero.subscriptions import Subscriptions
+from castero.logger import Logger, UDPLogger, FileLogger
 
 
 def import_subscriptions(path: str, database: Database) -> None:
@@ -90,7 +91,15 @@ def main():
                         version='%(prog)s {}'.format(castero.__version__))
     parser.add_argument('--import', help='path to OPML file of feeds to add')
     parser.add_argument('--export', help='path to save feeds as OPML file')
+    parser.add_argument('--log', help='Log to file')
+    # FIXME(eriks): add log level and host/port
     args = parser.parse_args()
+
+    if vars(args)['log'] is not None:
+        filename = vars(args)['log']
+        # FIXME(eriks): should be able to control log level
+        # TODO(eriks): should we always log to a file to help with bug fixing?
+        Logger.start(FileLogger(filename), Logger.TRACE)
 
     if vars(args)['import'] is not None:
         import_subscriptions(vars(args)['import'], database)
@@ -98,6 +107,8 @@ def main():
     elif vars(args)['export'] is not None:
         export_subscriptions(vars(args)['export'], database)
         sys.exit(0)
+
+    Logger.info("Starting Castero")
 
     # update fields in help menu text
     for field in Config:
@@ -154,6 +165,9 @@ def main():
         char = display.getch()
         if char != -1:
             running = display.handle_input(char)
+
+    Logger.info("Closing logger..\n")
+    Logger.close()
 
     sys.exit(0)
 

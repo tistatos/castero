@@ -13,6 +13,7 @@ from castero.episode import Episode
 from castero.feed import Feed, FeedError
 from castero.queue import Queue
 from castero.net import Net
+from castero.logger import Logger
 
 
 class Database():
@@ -538,6 +539,7 @@ class Database():
         # that we are given).
         # We also keep track of file-based feeds, which are handled afterwards.
         for feed in feeds:
+            Logger.debug("Reloading feed: " + feed.title)
             if feed.key.startswith("http"):
                 url_pairs[feed.key] = feed
                 reqs.append(Net.GGet(feed.key))
