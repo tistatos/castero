@@ -92,14 +92,36 @@ def main():
     parser.add_argument('--import', help='path to OPML file of feeds to add')
     parser.add_argument('--export', help='path to save feeds as OPML file')
     parser.add_argument('--log', help='Log to file')
-    # FIXME(eriks): add log level and host/port
+    parser.add_argument('--log-host', help='Log to host (disables log file)')
+    parser.add_argument('--log-port', help='Log to port (default port is 5335)')
+    parser.add_argument('-v', '--verbose', action="count", help='set verbosity level')
     args = parser.parse_args()
 
+    # TODO add to configuration file
+    log_level = Logger.INFO
+    log_port = 5335
+    log_filename = './castero.log'
+
+    if args.verbose is not None:
+        log_level = args.verbose
+
+    if vars(args)['log_port'] is not None:
+        try:
+            log_argument_port = int(vars(args)['log_port'])
+            log_port = log_argument_port
+        except:
+            pass
+
     if vars(args)['log'] is not None:
-        filename = vars(args)['log']
-        # FIXME(eriks): should be able to control log level
-        # TODO(eriks): should we always log to a file to help with bug fixing?
-        Logger.start(FileLogger(filename), Logger.TRACE)
+        log_filename = vars(args)['log']
+
+    if vars(args)['log_host'] is not None:
+        host = vars(args)['log_host']
+        Logger.start(UDPLogger(host, log_port), log_level)
+        Logger.info("Log level set to " + str(log_level))
+    else:
+        Logger.start(FileLogger(log_filename), log_level)
+        Logger.info("Log level set to " + str(log_level))
 
     if vars(args)['import'] is not None:
         import_subscriptions(vars(args)['import'], database)
@@ -166,7 +188,6 @@ def main():
         if char != -1:
             running = display.handle_input(char)
 
-    Logger.info("Closing logger..\n")
     Logger.close()
 
     sys.exit(0)

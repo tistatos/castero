@@ -32,14 +32,14 @@ class FileLogger:
 
 
 class Logger:
-    ERROR = 1
-    WARNING = 2
-    INFO = 3
-    DEBUG = 4
-    TRACE = 5
+    ERROR = -2
+    WARNING = -1
+    INFO = 0
+    DEBUG = 1
+    TRACE = 2
     METHOD = None
 
-    LOG_LEVEL = 1
+    LOG_LEVEL = 0
 
     class NullLogger:
         """Class with no side effects if logging is disabled
@@ -54,7 +54,7 @@ class Logger:
             pass
 
     @staticmethod
-    def start(method=NullLogger(), log_level=WARNING):
+    def start(method=NullLogger(), log_level=INFO):
         Logger.METHOD = method
         Logger.LOG_LEVEL = log_level
 
